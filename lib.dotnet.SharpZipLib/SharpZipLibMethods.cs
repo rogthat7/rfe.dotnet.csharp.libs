@@ -21,6 +21,12 @@ namespace lib.dotnet.SharpZipLib
             });
             await t;
         }
-       
+
+        public async Task<bool> RunProgram()
+        {
+            int.TryParse(Console.ReadLine(), out int input);
+            await ListAllZipsInTestData();
+            return true; 
+        }
     }
 }

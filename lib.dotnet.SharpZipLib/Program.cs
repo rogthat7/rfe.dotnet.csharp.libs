@@ -10,40 +10,30 @@ namespace lib.dotnet.SharpZipLib
     class Program
     {
         public static int input = default(int);
-        static void Main(string[] args)
+
+        static async Task Main(string[] args)
         {
             using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((_, services) =>
                 services.AddTransient<ISharpZipLibMethods, SharpZipLibMethods>()
-                        .AddTransient<SharpZipLibMethodsTest>()
                 )
             .Build();
 
-            RunProgram(host.Services);
+            var svc = ActivatorUtilities.CreateInstance<SharpZipLibMethods>(host.Services);
+            var cts = new CancellationTokenSource();
+            await RT<SharpZipLibMethods>(svc, cts.Token);
+
+            Console.ReadLine();
 
         }
-        static void RunProgram(IServiceProvider services)
-        {
-            using IServiceScope serviceScope = services.CreateScope();
-            IServiceProvider provider = serviceScope.ServiceProvider;
-            CancellationTokenSource wtoken = new CancellationTokenSource();;
-
-            var service = provider.GetRequiredService<SharpZipLibMethodsTest>();
-                
-            var res = RT<SharpZipLibMethodsTest>(service, wtoken.Token);
-
-
-        }
-        static async Task RT<T>(T task, CancellationToken token) where T : SharpZipLibMethodsTest 
+        static async Task RT<T>(T task, CancellationToken token) where T : ISharpZipLibMethods 
         {
             bool proceed = true;
             if (task == null)
                 return;
                 while (proceed)
                 {
-                    Console.WriteLine("Enter Input..");
-                    var x = Console.ReadKey();
-                    proceed = await task.RunTask(input);
+                    proceed = await task.RunProgram();
                 }
             
         }
