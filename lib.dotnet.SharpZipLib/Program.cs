@@ -9,7 +9,7 @@ namespace lib.dotnet.SharpZipLib
 {
     class Program
     {
-        public static int input = default(int);
+        static bool proceed = true;
 
         static async Task Main(string[] args)
         {
@@ -20,22 +20,25 @@ namespace lib.dotnet.SharpZipLib
             .Build();
 
             var svc = ActivatorUtilities.CreateInstance<SharpZipLibMethods>(host.Services);
-            var cts = new CancellationTokenSource();
-            await RT<SharpZipLibMethods>(svc, cts.Token);
-
-            Console.ReadLine();
+            await RT<SharpZipLibMethods>(svc);
 
         }
-        static async Task RT<T>(T task, CancellationToken token) where T : ISharpZipLibMethods 
+        static async Task RT<T>(T task) where T : ISharpZipLibMethods
         {
-            bool proceed = true;
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(myHandler);
             if (task == null)
                 return;
-                while (proceed)
-                {
-                    proceed = await task.RunProgram();
-                }
+            while (proceed)
+            {
+                proceed = await task.RunProgram();
+            }
             
+        }
+        protected static void myHandler(object sender, ConsoleCancelEventArgs args)
+        {
+            System.Console.WriteLine("Program Terminating....");
+            Task.Delay(TimeSpan.FromSeconds(2));
+            System.Environment.Exit(1);
         }
     }
 }

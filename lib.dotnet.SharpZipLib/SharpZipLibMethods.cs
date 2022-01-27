@@ -24,9 +24,21 @@ namespace lib.dotnet.SharpZipLib
 
         public async Task<bool> RunProgram()
         {
-            int.TryParse(Console.ReadLine(), out int input);
-            await ListAllZipsInTestData();
+            ConsoleKeyInfo cki;
+            System.Console.WriteLine("Input Your Options");
+            System.Console.WriteLine("0 : List all avaible zips");
+            System.Console.WriteLine("1 : Unzip the zip File");
+            System.Console.WriteLine("2 : Zip the target File");
+            System.Console.WriteLine("Ctrl+C : Exit the Program");
+            cki = Console.ReadKey(true);
+            
+            switch (cki.KeyChar)
+            {
+                case '0': {  Console.Clear(); await ListAllZipsInTestData(); break;}
+                default: {System.Console.WriteLine("Invalid Key Pressed");  Console.Clear(); break;}
+            }
             return true; 
         }
+        
     }
 }
