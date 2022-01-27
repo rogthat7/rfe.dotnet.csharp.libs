@@ -13,10 +13,11 @@ namespace lib.dotnet.SharpZipLib
 
             Task t = Task.Run(() =>
             {
+                int fileIndex = 0;
                 foreach (var file in files)
                 {
                     var info = new FileInfo(file);
-                    Console.WriteLine($"{Path.GetFileName(file)}:{info.Length} bytes");
+                    Console.WriteLine($"{fileIndex++} : {Path.GetFileName(file)}:{info.Length} bytes");
                 }
             });
             await t;
@@ -39,6 +40,10 @@ namespace lib.dotnet.SharpZipLib
             }
             return true; 
         }
-        
+
+        public async Task UnzipZipFile()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
