@@ -2,8 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace lib.dotnet.SharpZipLib
 {
@@ -13,11 +15,22 @@ namespace lib.dotnet.SharpZipLib
 
         static async Task Main(string[] args)
         {
+            var builder = new ConfigurationBuilder();
+            BuildConfig(builder);
+            // Configure Logger
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Build())
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+
             using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((_, services) =>
                 services.AddTransient<ISharpZipLibMethods, SharpZipLibMethods>()
                 )
+            .UseSerilog()
             .Build();
+
 
             var svc = ActivatorUtilities.CreateInstance<SharpZipLibMethods>(host.Services);
             await RT<SharpZipLibMethods>(svc);
@@ -25,6 +38,7 @@ namespace lib.dotnet.SharpZipLib
         }
         static async Task RT<T>(T task) where T : ISharpZipLibMethods
         {
+            
             Console.CancelKeyPress += new ConsoleCancelEventHandler(myHandler);
             if (task == null)
                 return;
@@ -39,6 +53,14 @@ namespace lib.dotnet.SharpZipLib
             System.Console.WriteLine("Program Terminating....");
             Task.Delay(TimeSpan.FromSeconds(2));
             System.Environment.Exit(1);
+        }
+
+        static void BuildConfig(IConfigurationBuilder builder)
+        {
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")??"Production"}.json",optional:true)
+            .AddEnvironmentVariables();
         }
     }
 }

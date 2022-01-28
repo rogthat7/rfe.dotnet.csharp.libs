@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 public interface ISharpZipLibMethods
 {
-    Task ListAllZipsInTestData();
+    Task<string[]> ListAllZipsInTestData();
     Task UnzipZipFile();
     Task<bool> RunProgram();
 }
